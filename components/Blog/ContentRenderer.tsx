@@ -111,13 +111,24 @@ export function ContentRenderer({ content }: ContentRendererProps) {
 
       case "image":
         return (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img
-            key={key}
-            src={node.attrs?.src as string}
-            alt={(node.attrs?.alt as string) || ""}
-            className="rounded-lg"
-          />
+          <figure key={key} className="my-6">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src={node.attrs?.src as string}
+              alt={(node.attrs?.alt as string) || ""}
+              className="rounded-lg w-full h-auto"
+              loading="lazy"
+              onError={(e) => {
+                const target = e.target as HTMLImageElement;
+                target.style.display = "none";
+              }}
+            />
+            {node.attrs?.alt && (
+              <figcaption className="text-center text-sm text-muted-foreground mt-2">
+                {node.attrs.alt as string}
+              </figcaption>
+            )}
+          </figure>
         );
 
       case "youtube":
