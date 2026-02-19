@@ -64,6 +64,7 @@ export function TipTapEditor({ content, onChange }: TipTapEditorProps) {
         class: "prose min-h-[400px] p-4 focus:outline-none",
       },
     },
+    immediatelyRender: false,
   });
 
   if (!editor) return null;
