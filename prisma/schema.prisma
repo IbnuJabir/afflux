@@ -1,0 +1,81 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = "file:./dev.db"
+}
+
+model User {
+  id            String    @id @default(cuid())
+  email         String    @unique
+  password      String
+  name          String?
+  role          String    @default("ADMIN") // ADMIN, EDITOR
+  posts         Post[]
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+}
+
+model Post {
+  id              String      @id @default(cuid())
+  title           String
+  slug            String      @unique
+  excerpt         String?
+  content         String      // JSON stored as string
+  featuredImage   String?
+  status          String      @default("DRAFT") // DRAFT, PUBLISHED, SCHEDULED
+  metaTitle       String?
+  metaDescription String?
+  keywords        String?
+  readTime        Int?        // Minutes
+  views           Int         @default(0)
+  featured        Boolean     @default(false)
+  publishedAt     DateTime?
+  author          User        @relation(fields: [authorId], references: [id])
+  authorId        String
+  category        Category?   @relation(fields: [categoryId], references: [id])
+  categoryId      String?
+  tags            PostTag[]
+  createdAt       DateTime    @default(now())
+  updatedAt       DateTime    @updatedAt
+
+  @@index([slug])
+  @@index([status])
+  @@index([categoryId])
+  @@index([publishedAt])
+}
+
+model Category {
+  id          String   @id @default(cuid())
+  name        String   @unique
+  slug        String   @unique
+  description String?
+  posts       Post[]
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([slug])
+}
+
+model Tag {
+  id        String    @id @default(cuid())
+  name      String    @unique
+  slug      String    @unique
+  posts     PostTag[]
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+  @@index([slug])
+}
+
+model PostTag {
+  post      Post     @relation(fields: [postId], references: [id], onDelete: Cascade)
+  postId    String
+  tag       Tag      @relation(fields: [tagId], references: [id], onDelete: Cascade)
+  tagId     String
+  createdAt DateTime @default(now())
+
+  @@id([postId, tagId])
+}
