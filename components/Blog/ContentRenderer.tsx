@@ -49,7 +49,7 @@ export function ContentRenderer({ content }: ContentRendererProps) {
 
       case "text": {
         let element: React.ReactNode = node.text;
-        if (node.marks) {
+        if (Array.isArray(node.marks)) {
           for (const mark of node.marks) {
             switch (mark.type) {
               case "bold":
