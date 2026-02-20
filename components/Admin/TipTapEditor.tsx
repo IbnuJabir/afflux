@@ -33,6 +33,21 @@ interface TipTapEditorProps {
 }
 
 export function TipTapEditor({ content, onChange }: TipTapEditorProps) {
+  // Parse content once to avoid re-parsing on every render
+  const initialContent = (() => {
+    if (!content) return undefined;
+    try {
+      const parsed = JSON.parse(content);
+      // Validate it's a proper TipTap doc
+      if (parsed && typeof parsed === "object" && parsed.type === "doc" && Array.isArray(parsed.content)) {
+        return parsed;
+      }
+      return undefined;
+    } catch {
+      return undefined;
+    }
+  })();
+
   const editor = useEditor({
     extensions: [
       StarterKit.configure({
@@ -55,7 +70,7 @@ export function TipTapEditor({ content, onChange }: TipTapEditorProps) {
       TableCell,
       TableHeader,
     ],
-    content: content ? JSON.parse(content) : undefined,
+    content: initialContent,
     onUpdate: ({ editor }) => {
       onChange(JSON.stringify(editor.getJSON()));
     },
