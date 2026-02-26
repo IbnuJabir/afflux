@@ -17,6 +17,7 @@ interface CategoriesDropdownProps {
 export function CategoriesDropdown({ categories }: CategoriesDropdownProps) {
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
+  const timeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
@@ -26,14 +27,33 @@ export function CategoriesDropdown({ categories }: CategoriesDropdownProps) {
     }
 
     document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+      if (timeoutRef.current) clearTimeout(timeoutRef.current);
+    };
   }, []);
 
+  const handleMouseEnter = () => {
+    if (timeoutRef.current) clearTimeout(timeoutRef.current);
+    setIsOpen(true);
+  };
+
+  const handleMouseLeave = () => {
+    timeoutRef.current = setTimeout(() => {
+      setIsOpen(false);
+    }, 150);
+  };
+
   return (
-    <div className="relative" ref={dropdownRef}>
+    <div 
+      className="relative" 
+      ref={dropdownRef}
+      onMouseEnter={handleMouseEnter}
+      onMouseLeave={handleMouseLeave}
+    >
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="flex items-center gap-1 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
+        className="flex items-center gap-1 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors cursor-pointer"
       >
         Categories
         <ChevronDown className={`h-4 w-4 transition-transform ${isOpen ? "rotate-180" : ""}`} />
@@ -49,23 +69,19 @@ export function CategoriesDropdown({ categories }: CategoriesDropdownProps) {
                     key={category.id}
                     href={`/category/${category.slug}`}
                     onClick={() => setIsOpen(false)}
-                    className="block px-4 py-2 text-sm text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
+                    className="block px-4 py-2 text-sm text-muted-foreground hover:text-foreground hover:bg-muted transition-colors cursor-pointer"
                   >
                     {category.name}
                   </Link>
                 ))}
-                {categories.length > 8 && (
-                  <>
-                    <div className="border-t border-border my-2" />
-                    <Link
-                      href="/categories"
-                      onClick={() => setIsOpen(false)}
-                      className="block px-4 py-2 text-sm font-medium text-primary hover:bg-muted transition-colors"
-                    >
-                      View all categories →
-                    </Link>
-                  </>
-                )}
+                <div className="border-t border-border my-2" />
+                <Link
+                  href="/categories"
+                  onClick={() => setIsOpen(false)}
+                  className="block px-4 py-2 text-sm font-medium text-primary hover:bg-muted transition-colors cursor-pointer"
+                >
+                  See all categories →
+                </Link>
               </>
             ) : (
               <p className="px-4 py-2 text-sm text-muted-foreground">No categories yet</p>
